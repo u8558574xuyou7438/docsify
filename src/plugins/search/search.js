@@ -66,6 +66,13 @@ function getTableData(token) {
   return token.text;
 }
 
+function getListData(token) {
+  if (!token.text && token.type === 'list') {
+    token.text = token.raw;
+  }
+  return token.text;
+}
+
 function saveData(maxAge, expireKey, indexKey) {
   localStorage.setItem(expireKey, Date.now() + maxAge);
   localStorage.setItem(indexKey, JSON.stringify(INDEXS));
@@ -76,6 +83,7 @@ export function genIndex(path, content = '', router, depth) {
   const slugify = window.Docsify.slugify;
   const index = {};
   let slug;
+  let title = '';
 
   tokens.forEach(token => {
     if (token.type === 'heading' && token.depth <= depth) {
@@ -87,7 +95,16 @@ export function genIndex(path, content = '', router, depth) {
         slug = router.toURL(path, { id: slugify(escapeHtml(token.text)) });
       }
 
-      index[slug] = { slug, title: str, body: '' };
+      if (str) {
+        title = str
+          .replace(/<!-- {docsify-ignore} -->/, '')
+          .replace(/{docsify-ignore}/, '')
+          .replace(/<!-- {docsify-ignore-all} -->/, '')
+          .replace(/{docsify-ignore-all}/, '')
+          .trim();
+      }
+
+      index[slug] = { slug, title: title, body: '' };
     } else {
       if (!slug) {
         return;
@@ -97,10 +114,12 @@ export function genIndex(path, content = '', router, depth) {
         index[slug] = { slug, title: '', body: '' };
       } else if (index[slug].body) {
         token.text = getTableData(token);
+        token.text = getListData(token);
 
         index[slug].body += '\n' + (token.text || '');
       } else {
         token.text = getTableData(token);
+        token.text = getListData(token);
 
         index[slug].body = index[slug].body
           ? index[slug].body + token.text
@@ -203,7 +222,7 @@ export function init(config, vm) {
   let namespaceSuffix = '';
 
   // only in auto mode
-  if (isAuto && config.pathNamespaces) {
+  if (paths.length && isAuto && config.pathNamespaces) {
     const path = paths[0];
 
     if (Array.isArray(config.pathNamespaces)) {
@@ -217,6 +236,13 @@ export function init(config, vm) {
         namespaceSuffix = matches[0];
       }
     }
+    const isExistHome = paths.indexOf(namespaceSuffix + '/') === -1;
+    const isExistReadme = paths.indexOf(namespaceSuffix + '/README') === -1;
+    if (isExistHome && isExistReadme) {
+      paths.unshift(namespaceSuffix + '/');
+    }
+  } else if (paths.indexOf('/') === -1 && paths.indexOf('/README') === -1) {
+    paths.unshift('/');
   }
 
   const expireKey = resolveExpireKey(config.namespace) + namespaceSuffix;

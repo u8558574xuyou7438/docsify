@@ -245,10 +245,10 @@ window.$docsify = {
   // Custom file name
   coverpage: 'cover.md',
 
-  // mutiple covers
+  // multiple covers
   coverpage: ['/', '/zh-cn/'],
 
-  // mutiple covers and custom file name
+  // multiple covers and custom file name
   coverpage: {
     '/': 'cover.md',
     '/zh-cn/': 'cover.md',
@@ -410,7 +410,7 @@ window.$docsify = {
 };
 ```
 
-?> If this options is `false` but you dont want to emojify some specific colons , [Refer this](https://github.com/docsifyjs/docsify/issues/742#issuecomment-586313143)
+?> If this options is `false` but you don't want to emojify some specific colons , [Refer this](https://github.com/docsifyjs/docsify/issues/742#issuecomment-586313143)
 
 ## mergeNavbar
 
@@ -490,6 +490,19 @@ window.$docsify = {
 ```js
 window.$docsify = {
   routerMode: 'history', // default: 'hash'
+};
+```
+
+## crossOriginLinks
+
+- type: `Array`
+
+When `routerMode: 'history'`, you may face the cross-origin issues, See [#1379](https://github.com/docsifyjs/docsify/issues/1379).
+In Markdown content, there is a simple way to solve it, see extends Markdown syntax `Cross-Origin link` in [helpers](helpers.md).
+
+```js
+window.$docsify = {
+  crossOriginLinks: ['https://example.com/cross-origin-link'],
 };
 ```
 
@@ -591,7 +604,7 @@ window.$docsify = {
 };
 ```
 
-Load the right 404 page according to the localisation:
+Load the right 404 page according to the localization:
 
 ```js
 window.$docsify = {
@@ -616,3 +629,104 @@ window.$docsify = {
   topMargin: 90, // default: 0
 };
 ```
+
+## vueComponents
+
+- type: `Object`
+
+Creates and registers global [Vue components](https://vuejs.org/v2/guide/components.html). Components are specified using the component name as the key with an object containing Vue options as the value. Component `data` is unique for each instance and will not persist as users navigate the site.
+
+```js
+window.$docsify = {
+  vueComponents: {
+    'button-counter': {
+      template: `
+        <button @click="count += 1">
+          You clicked me {{ count }} times
+        </button>
+      `,
+      data() {
+        return {
+          count: 0,
+        };
+      },
+    },
+  },
+};
+```
+
+```markdown
+<button-counter></button-counter>
+```
+
+<output data-lang="output">
+  <button-counter></button-counter>
+</output>
+
+## vueGlobalOptions
+
+- type: `Object`
+
+Specifies [Vue options](https://vuejs.org/v2/api/#Options-Data) for use with Vue content not explicitly mounted with [vueMounts](#mounting-dom-elements), [vueComponents](#components), or a [markdown script](#markdown-script). Changes to global `data` will persist and be reflected anywhere global references are used.
+
+```js
+window.$docsify = {
+  vueGlobalOptions: {
+    data() {
+      return {
+        count: 0,
+      };
+    },
+  },
+};
+```
+
+```markdown
+<p>
+  <button @click="count -= 1">-</button>
+  {{ count }}
+  <button @click="count += 1">+</button>
+</p>
+```
+
+<output data-lang="output">
+  <p>
+    <button @click="count -= 1">-</button>
+    {{ count }}
+    <button @click="count += 1">+</button>
+  </p>
+</output>
+
+## vueMounts
+
+- type: `Object`
+
+Specifies DOM elements to mount as [Vue instances](https://vuejs.org/v2/guide/instance.html) and their associated options. Mount elements are specified using a [CSS selector](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Selectors) as the key with an object containing Vue options as their value. Docsify will mount the first matching element in the main content area each time a new page is loaded. Mount element `data` is unique for each instance and will not persist as users navigate the site.
+
+```js
+window.$docsify = {
+  vueMounts: {
+    '#counter': {
+      data() {
+        return {
+          count: 0,
+        };
+      },
+    },
+  },
+};
+```
+
+```markdown
+<div id="counter">
+  <button @click="count -= 1">-</button>
+  {{ count }}
+  <button @click="count += 1">+</button>
+</div>
+```
+
+<output id="counter">
+  <button @click="count -= 1">-</button>
+  {{ count }}
+  <button @click="count += 1">+</button>
+</output>
